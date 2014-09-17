@@ -1,0 +1,177 @@
+\section{Bisection \& Twisted Algorithm}
+The singular value decomposition of an arbitrary matrix $A\in R^{mn} (m>n)$ consists of two steps:
+The first step is to reduce the initial matrix $A$ to bidiagonal form using Householder transformation.
+The second step is to reduce the bidiagonal matrix into diagonal matrix.
+
+All algorithms should make use of Householder transformation to reduces the time cost of SVD.
+The time complexity of QR algorithm, Jacobi algorithm and bisection and inverse algorithm will change from $O(n^3)$ to $O(n^4)$ without Householder transformation, while divide-and-conquer algorithm cannot work any more.
+Thus, in this paper, we only focus on the second step with bisection and twisted algorithm.
+
+The bisection and twisted algorithm is separated into two phases:
+\begin{enumerate}
+\item Obtain the singular values of bi-diagonal matrix by using bisection approach.
+\item Obtain the conresponding left and right singular vectors of each singular values by using twisted factorization.
+\end{enumerate}
+We will illustrate these two phases in the following subsections.
+
+\subsection{Bisection Algorithm}
+Bisection algorithm is widely used in many application to find the root of a sophisticated equation which can not be solve directly.
+It repeatedly bisects an interval and then selects a subinterval for further processing until convergence.
+The algorithm is an approximate approach to solve the equations.
+It can obtain relative accuracy solution when the toleration is relative strict.
+
+Suppose $B$ is an upper bidiagonal $n*n$ matrix with elements $b_{i,j}$ reduced by Householder transform.
+The matrix $T = B^T B - \mu^2 I$ can be decomposed as
+\begin{equation}
+\label{eq:T}
+T = B^T B - \mu^2 I = L D L^T
+\end{equation}
+where $D$ is $diag(d_{1}, \cdots, d_{n})$,
+%\[ D =  \left( \begin{array}{cccc}
+%d_{1} & 0     & \cdots & 0 \\
+%0     & d_{2} & \cdots & 0 \\
+%\vdots& \vdots& \ddots & \vdots \\
+%    0 & 0     & \cdots & d_{n} \end{array} \right),
+\begin{equation}
+ L =  \left( \begin{array}{ccccc}
+     1&      &       &        &  \\
+ l_{1}& 1    &       & 0      &  \\
+      & l_{2}& \ddots&        &  \\
+      & 0    & \ddots& \ddots &  \\
+      &      &       & l_{n-1}& 1
+\end{array} \right) 
+\label{eq:l}
+\end{equation}
+%$L$ are left bidiagonal matrices with diagonal elements 1s and sub-diagonal elements $l_{i}$.
+Substitute $L$ and $D$ into Equation \ref{eq:T}, we can obtain the following equations
+\begin{equation}
+\left \{
+\begin{aligned}
+b_{1,1}^2 - \mu^2 &= d_1\\
+b_{k-1,k-1} b_{k-1,k} &= d_{k-1} l_{k-1}\\
+b_{k-1,k}^2 + b_{k,k}^2 - \mu^2 &= l_{k-1}^2 d_{k-1} + d_k
+\end{aligned}
+\right .
+\label{eq:ldl}
+\end{equation}
+where $k = 2,3,\cdots,n$.
+We define a temperary value $t_{k}$
+\begin{equation}
+t_{k} = t_{k-1} * (b_{k-1,k}^2 / d) - \mu^2.
+\label{eq:tmp}
+\end{equation}
+After equivalent transformation, the Equations \ref{eq:ldl} can be rewrited as
+\begin{equation}
+\label{eq:negcount}
+d_k = b_{k,k}^2 + t_{k}
+\end{equation}
+
+It is clear that matrix $D$ and matrix $T$ are two congruent symmetric matrices.
+According to the Sylvester's law of inertia, matrix $D$ and matrix $T$ has have the same numbers of positive, negative, and zero eigenvalues.
+We define $NegCount(\mu)$ function to be the number of negative eigenvalues in matrix $T$ with $\mu^2$ shift.
+Since matrix $B$ and matrix $B^T$ have the same singular values,
+$NegCount(\mu)$ is also the number of the singular values of $B$ which are less than $\mu$.
+It is clear that if the floating point arithmetic is monotonic, then $NegCount(x)$ is a monotonically increasing function of $x$\cite{95ETNAbisecion}.
+The $NegCount$ function is in Algorithm \ref{alg:negcount}.
+\input{algorithm_negcount}
+%Algorithm \ref{alg:negcount} is used to count the number of singular values of matrix $B$ those are less than $\mu$.
+%From the algorithm, the number of singular values in an arbitrary interval $[\mu_1,\mu_2)$ are $c_{\mu_2} - c_{\mu_1}$.
+
+
+\input{algorithm_bisection}
+Algorithm \ref{alg:bisection} is the serial bisection algorithm.
+It is able to calculate the singular values in a interval $[l,u)$, whose $NegCount$ are $n_l$ and $n_u$, seperately.
+The basic steps of the algorithm for singular value are as follows:
+\begin{enumerate}
+\item Divides one interval containing singular values into two subintervals.
+\item Utilizes $NegCount$ algorithm to get the number of singular values in subintervals.
+\item Selects the subinterval(s) which contain singular values for furthur bisection.
+\item Repeated 1-3 until all subintervals becomes comvergence.% which means the left border and right border of the subintervals are almost equal to each other.
+\item The singular values are considered as the midpoint of the subintervals.
+\end{enumerate}
+
+The algorithm provides theoretical basis to calculate the singular values in a specified interval.
+The interval containing all the singular values can be calculated by Gershgorin circle theorem.
+%In the algorithm, $MidPoint$ should avoid the possibility of overflow or underflow.
+
+\subsection{Twisted Algorithm}
+After the first step of obtaining the singular values, it is still necessary to get their corresponding left and right singular vectors.
+The simplest method to obtain the singular vectors is the power method, which can find only the largest singular value and the corresponding singular vector\cite{97bookalgebra}.
+The second method is inverse iteration.
+However, there is no guarantee that the singular vectors are accurate or orthogonal.
+Additionally, the inverse iteration requires $O(n^3)$ to obtain all the singular vectors.
+
+We utilize the improved twisted factorization to calculate the singular vectors.
+The algorithm improves the accurate or orthogonal problems in general twisted factorization.
+It can also solve the singular vectors whose singular values are clustered together.
+
+Suppose $\lambda$ is one singular value of bidiagonal matrix $B$.
+Then the matrix $B^T B - \lambda^2 I$ can be decomposed as
+\begin{equation}
+B^T B - \lambda^2 I = L D_L L^T = U D_U U^T
+\end{equation}
+where $D_L=diag(\alpha_1, \cdots, \alpha_n)$, $D_U = diag(\beta_1, \cdots, \beta_n)$, $L$ is the same form with Equation \ref{eq:l}
+%\[ L =  \left( \begin{array}{ccccc}
+%     1&      &       &        &  \\
+% l_{1}& 1    &       & 0      &  \\
+%      & l_{2}& \ddots&        &  \\
+%      & 0    & \ddots& \ddots &  \\
+%      &      &       & l_{n-1}& 1
+%\end{array} \right),
+\begin{equation}
+ U =  \left( \begin{array}{ccccc}
+  1 & u_{1}&       &       &  \\
+    & 1    & u_{2} & 0     &  \\
+    &      & 1     & \ddots&  \\
+    & 0    &       & \ddots& u_{n-1} \\
+    &      &       &       & 1
+ \end{array} \right)
+\end{equation}
+%$L$ is left bidiagonal matrix, $U$ is upper bidiagonal matrix.
+%The diagonal elements in $L$ and $U$ are 1s.
+%The subdiagonal elements are $l_k$ in $L$, and the superdiagonal elements are $u_k$ in $U$, separately.
+
+Given the $LDL^T$ and $UDU^T$ decomposition, we consider the twisted factorization of the shifted matrix
+\begin{equation}
+B^T B - \lambda^2 I = N_k D_k N_k^T
+\end{equation}
+where $N_k$ is the twisted matrix.
+$k$ is the index of the minimum $\gamma$ in Eq. \ref{eq:gamma}.
+%\begin{equation}
+%N_k =  \left( \begin{array}{cccccccc}
+%     1&       &        &  & \cdots & 0 \\
+% l_{1}& \ddots&        &  & 0 \\
+%      & \ddots& 1      &  & 0 \\
+%      &       & l_{k-2}& 1 & \vdots \\
+%      &       &        & \eta_k & 1 \\
+%      &       &        & \cdots & 1 \\
+%      &       & 0      & \cdots & 1 \\
+%      &       &        & \cdots & 1 \end{array} \right)
+%\end{equation}
+\begin{equation}
+\label{eq:gamma}
+k = \arg \min_{1\le i \le n} \gamma_{i} =
+\begin{cases}
+\beta_1 & \text{if } i=1 \\
+\beta_i - \alpha_i * l_{i-1} & \text{if } 2\le i\le n-1\\
+\alpha_n & \text{if } i=n
+\end{cases}
+\end{equation}
+
+Thus, the corresponding singular vector of $\lambda$ is solving the following matrix equations and normalize the solution.
+\begin{equation}
+\label{eq:unnorm}
+N_k^T z_k = e_k
+\end{equation}
+where $e$ is the unitary matrix, and $z$ is the non-normalization solution of singular vectors.
+
+Above is the solution when singular values do not equal to others.
+Our algorithm has a small modification when singular values are clustered together.
+Suppose $r$ is the multiplicity of singular values of matrix $B$. 
+The algorithm selects the indeces of the first $r$ minimum value of $gamma$.
+Each index $k$ has one different twisted factorization, and thus has a different Eq. \ref{eq:unnorm} to solve.
+The singular vectors are also orthogonal to each others\cite{09NLAAtwisted}.
+\input{algorithm_twisted}
+Algorithm \ref{alg:twisted} is the algorithm to obtain the corresponding singular vectors of given singular values in serial.
+The cost for every singular vector transformation is $O(n)$, and the total cost of the transfromations is $O(n^2)$.
+

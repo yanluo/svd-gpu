@@ -1,0 +1,32 @@
+%\alglanguage{pseudocode}
+\begin{algorithm}
+%\small
+\caption{Bisection Algorithm}
+\label{alg:bisection}
+\begin{algorithmic}[1]
+\Procedure{$\mathbf{Bisection}$}{$val, n, B, l, u, n_l, n_u,\tau$}
+  \If {$n_l \geq n_r$ or $l > u$}
+    \State No singular values in $[l,u)$;
+  \EndIf
+  \State Enqueue ($l, u, n_l, n_u$) to Worklist;
+  \While {Worklist is not empty}
+    \State Dequeue ($a, b, n_a, n_b$) from Worklist;
+    \If {$b - a < \tau$}
+      \For {$i=n_a+1 \to n_b$}
+        \State $val[i] = \min(\max((a+b)/2,a),b)$;
+      \EndFor
+    \Else
+      \State $m = MidPoint(a,b)$;
+      \State NegCount($n_m, B, m$);
+      \State $n_m = \min(\max(n_m,n_a),n_b)$;
+      \If {$n_m > m_a$}
+        \State Enqueue ($a, m, n_a, n_m$) to Worklist;
+      \EndIf
+      \If {$n_m < m_b$}
+        \State Enqueue ($m, b, n_m, n_b$) to Worklist;
+      \EndIf
+    \EndIf
+  \EndWhile
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}

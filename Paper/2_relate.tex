@@ -1,0 +1,40 @@
+\section{relate Work}
+General purpose GPU (GPGPU) becomes the research focus for its parallel computing power these years.
+It provides a functionally complete set of operations to compute any computable value.
+Linear algebra is the first batch of object to accelerate on GPU.
+
+CUBLAS is an implementation of BLAS (Basic Linear Algebra Subprograms) library supported by NVIDIA\cite{cublas}.
+Many solutions of simple linear equations are provided in CUBLAS.
+However, it does not provides the complex linear algebra problems, such as QR decomposition, LU decomposition, and SVD.
+CULA is an commercial hybrid GPU accelerated linear algebra routines\cite{cula}.
+It provides high-level linear algebra operations. The singular value decomposition employs QR algorithm. It is not a effective algorithm when matrix scale becomes larger.
+MAGMA is the project that aims to achieve high performance and portability across a wide range of multi-core architectures and hybrid systems respectively\cite{magma}.
+
+SVD algorithms is a high-level linear algebra routines.
+It is still a research direction because of its various applications.
+
+The QR algorithm is the most commonly used SVD algorithm.
+It is able to calculate the singular values and singular vactors with high relative accuracy and numerical stability\cite{97bookalgebra}. 
+Sheetal et al\cite{09IPDPSQR} firstly introduces SVD algorithm on CUDA programming.
+In their method, they apply QR iteration algorithm and parallelize the algorithm on GPU.
+They use CUBLAS library to accelerate matrix and vector operations, and design an architecture for bidiagonalizaiton and diagonalization. 
+Their implementation shows a speedup of upto 8 over the Intel MKL QR implementation.
+However, the QR-iteration algorithm has its defect on parallelization.
+The heavy data dependency makes QR algorithm not suitable for parallelization.
+The QR-iteration algorithm requires $O(n^3)$ to complete the diagonalization. The decomposition time is not intolerable when the matrix size scale is huge.
+Additionally, calling too much CUBLAS kernels also reduces the performance in the GPU design.
+
+Ding et al\cite{13CFDC} implement the divide-and-conquer approach for solving SVD on heterogeneous CPU-GPU system.
+It is up to 7 time faster than CULA QR algorithm executing on the same device M2070, and up to 33 times faster than LAPACK.
+However, the divide-and-conquer approach is not relative accuracy in the merging phase, especially when the data scale is huge.
+In the worst case, if the singular values are in the dense distribution, it will require $O(n^3)$ to complete SVD\cite{97bookalgebra}.
+The implementation in the paper utilizes pipelines in the heterogeneous architercture.
+It does not make full use of resources on GPUs.
+The frequent data transfer between GPU and CPU will drag the speedup in the execution time.
+Additionally, their pipeline architecture is difficult to extend to multi-core architecture.
+
+Vedran\cite{14arxivjacobi} presents a hierarchically blocked one-sided Jacobi algorithm for the singular value decomposition, targeting both single and multiple GPUs.
+It is the first paper to introduce multi-GPU to calculate SVD.
+But due to the speed limitation of the algorithm, even it is fully optimization and has a high speedup compared to the same algorithm on CPU, the execution time is still more than that of any other algorithms.
+It could not be the best algorithm for speedup except when extreme relative accuracy is required.
+

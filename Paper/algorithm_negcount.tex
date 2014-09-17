@@ -1,0 +1,19 @@
+%\alglanguage{pseudocode}
+\begin{algorithm}
+%\small
+\caption{NegCount in Bisection Algorithm}
+\label{alg:negcount}
+\begin{algorithmic}[1]
+\Procedure{$\mathbf{NegCount}$}{$n, B, \mu$}
+  \State $d=1$, $t=0$, $cnt=0$, $b_{0,1}=0$;
+  \For {$k = 1 \to n$}
+    \State $t = t * (b_{k-1,k}^2 / d) - \mu^2$;
+    \State $d = b_{k,k}^2 + t$;
+    \If {$d < 0$}
+      \State $cnt++$;
+    \EndIf
+  \EndFor
+  \State \Return $cnt$;
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}

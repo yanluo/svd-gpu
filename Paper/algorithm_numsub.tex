@@ -1,0 +1,25 @@
+\begin{algorithm}
+%\small
+\caption{Equal Number of Singular Value Subinterval Algorithm}
+\label{alg:numsub}
+\begin{algorithmic}[1]
+\Procedure{$\mathbf{Number\_Divide}$}{$n, B, t, \tau$}
+  \State Obtain singular value boundary $[l,u)$ of matrix $B$;
+  \State Define the thread ID $i$, $i<t$;
+  \State $mid = inside(l, u, B)$;
+  \State $n_m = NegCount(n, B, mid)$;
+  \While {$n_m \ne (i+1)n/t$ and $mid-l > \tau$}
+    \If {$n_m \ge (i+1)n/t$}
+      \State $u=mid$;
+      \State $n_u=n_m$;
+    \Else
+      \State $l=mid$;
+      \State $n_l=n_m$;
+    \EndIf
+    \State $mid = inside(l, u, B)$;
+    \State $n_m = NegCount(n, B, mid)$;
+  \EndWhile
+  \State save the division point $mid$ and $n_m$.
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}

@@ -1,0 +1,29 @@
+%\alglanguage{pseudocode}
+\begin{algorithm}
+%\small
+\caption{Twisted Factorization}
+\label{alg:twisted}
+\begin{algorithmic}[1]
+\Procedure{$\mathbf{Twisted}$}{$q, n, B, \mu$}
+  \LineComment $l$ is the number of different singular values, $l\le n$;
+  \For {$i = 1 \to l$}
+    \State Computes the matrix $S = B - \mu_i^2 I$;
+    \State Computes the $LDL'$ decomposition $S = LD_LL'$;
+    \State Computes the $UDU'$ decomposition $S = UD_UU'$;
+    \State Computes $gamma$ based on Eq \ref{eq:gamma};
+    \State Find the multiplicity $m$ of singular value $\mu$;
+    \State Find $m$-th minimum $k = min_j  |\gamma(j)|$;
+    \For {each k}
+    \State $z_k = 1$, $z_{k-1} = -L_{k-1,k}$, $z_{k+1} = -U_{k,k+1}$;
+    \For {$j = k+2 \to n$}
+      \State $z_j = -U_{j-1,j}*z_{j-1}$
+    \EndFor
+    \For {$j = k-2 \to 1$}
+      \State $z_j = -L_{j+1,j}*z_{j+1}]$
+    \EndFor
+    \State Scale vector $q = z/||z||_2$;
+    \EndFor
+  \EndFor
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}

@@ -1,0 +1,23 @@
+\begin{algorithm}
+%\small
+\caption{Equal Length Subinterval Algorithm}
+\label{alg:lengthsub}
+\begin{algorithmic}[1]
+\Procedure{$\mathbf{Length\_Divide}$}{$n, B, t, \tau$}
+  \State Obtain singular value boundary $[l,u)$ of matrix $B$;
+  \State Define the thread ID $i$, $i<t$;
+  \State Obtain average step $s = (u-l) / t $;
+  \State Lower bound $\alpha = l + i * s$;
+%  \State Upper bound $\beta = max(l + (i+1) * s, \alpha)$;
+  \State $n_{\alpha} = NegCount(\alpha)$;
+%  \State $n_{\beta} = NegCount(\beta)$;
+%  \State $\alpha = \min(\alpha,\beta)$;
+%  \State $\beta = \max(\alpha, \beta)$;
+%  \State $n_{\alpha} = \min(n_{\alpha},n_{\beta})$;
+%  \State $n_{\beta} = \max(n_{\alpha}, n_{\beta})$;
+%  \State Max scan to refine $\alpha, \beta, n_{\alpha}, n_{\beta}$
+%  \State Call $Bisection(val, n, B, \alpha, \beta, n_{\alpha}, n_{\beta}, \tau)$
+  \State save the division point $\alpha$ and $n_{\alpha}$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
