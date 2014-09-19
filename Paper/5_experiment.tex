@@ -138,7 +138,8 @@ When the matrix size is larger than 15000, the additional execution time is a li
 \centering
 \begin{tabular}{|c|c|c|c|c|c|c|}
 \hline
-\diagbox{Size}{Time(s)}{GPUs} & 1 & 2 & 3 & 4 & 5 & 6 \\ \hline
+Matrix & \multicolumn{6}{|c|}{Number of GPUs} \\ \cline{2-7}
+Size & 1 & 2 & 3 & 4 & 5 & 6 \\ \hline
 100K   &   442s  &   224s  &   159s  &   123s  &    98s  &    87s\\ \hline
 200K   &  1666s  &   837s  &   564s  &   427s  &   341s  &   291s\\ \hline
 500K   & 13007s  &  6516s  &  4355s  &  3280s  &  2626s  &  2191s\\ \hline
