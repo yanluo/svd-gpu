@@ -6,11 +6,11 @@ all: $(OBJ).tex $(SRC)
 	pdflatex $(OBJ)
 
 normal: $(OBJ).tex $(SRC)
-	bibtex $(filename)
-	latex $(filename)
-	latex $(filename)
-	dvips -f -tletter -Ppdf -G0 $(filename) > $(filename).ps
-	ps2pdf $(filename).ps $(filename).pdf
+#	bibtex $(OBJ)
+	latex $(OBJ)
+	latex $(OBJ)
+	dvips -f -tletter -Ppdf -G0 $(OBJ) > $(OBJ).ps
+	ps2pdf $(OBJ).ps $(OBJ).pdf
 	
 clean:
 	rm -f *.ps *.dvi *.aux *.log *.pdf *.bbl *.blg *~ *.gz
