@@ -78,14 +78,50 @@ But the 10X speedup compared to CPU is low because of the heavy usage of global 
 After we utilize the local memory and shared memory instead of frequent-used global memory and change the matrix arrangement from row-major to column-major.
 The performance nearly doubled.
 
+Since the singular vectors are two $n\times n$ matrices, the memory on GPU will effect the maximum matrix size.
+Based on our desing, all the singular vectors require $5\times n^2$ floating numbers.
+Thus, the maximum matrix size is determined by
+\begin{equation}
+m_t = \sqrt{U / (5 * 4)}
+\label{eq:max_size}
+\end{equation}
+where $U$ is the memory size of GPU, $4$ means the size of float number.
+
 \subsection{Huge Size Solution}
-When the matrix size becomes more than a certain level determined by GPU memory, the singular vector kernel cannot obtain all the singular vectors at the same time.
+In our design, the maximum singular values can be processed on a singular GPU is $m_b = block\_size \times thread\_block\_size$,
+while the maximum singular vectors are determined by Equation \ref{eq:max_size}.
+Usually, $m_b$ is much larger than $m_t$.
+For Tesla K40c with 16GB memory, $m_t = 24K$, while $m_b = 262K$
+However, when the matrix size becomes larger than $m_t$, even larger than $m_b$,
+the singular vector kernel cannot obtain all singular vectors at the same time.
 In this subsection, we introduce a divide-and-conquer architecture to solve the huge matrix size.
 
-Due to the disivibility of the bisection and twisted algorithm, we can easily separate the whole interval into several subsections.
-The GPU calculates one subsection at the same time.
-After one subsection is finished, GPU processes the next one, until the last one.
-Thus, the execution time is the summation of every subsection.
+When matrix size is less than $m_b$, but larger than $m_t$ from Equation \ref{eq:max_size},
+we only need to separate the singular vectors into small pieces which can be processed by a single GPU.
+When matrix size is larger than $m_b$, we should separate both singular values and singular vectors into small pieces.
 
-\textbf{Multiple-GPU version}
-When matrix size is huge, the performance 
+The division of singular value can be divided by $m_b$ directly.
+Thus, there are $l_b = \lfloor(n/m_b)\rfloor + 1$ pieces, and each pieces has $\lfloor(n/l_b)\rfloor$ singular values.
+
+The division of singular vector should take memory size into consider.
+The maximum pieces $l_t$ can be rewrite from Equation \ref{eq:max_size} as follow:
+\begin{equation}
+l_t = \sqrt{U/(5 * n * 4)}
+\label{eq:max_length}
+\end{equation}
+where $n$ is matrix size.
+Thus, There should be $\lfloor(n/l_t)\rfloor+1$ pieces with $\lfloor(n/l_t)\rfloor$ singular vectors each pieces.
+For a single GPU, the execution between every pieces is serial.
+When one piece finished, GPU processes the next one, until the last one.
+Thus, the execution time is the summation of every subsection.
+Equation \ref{eq:max_length} also provides the theorical maximum matrix size can be processed on GPUs when set $l=1$.
+For Tesla K40c, the theorical maximum matrix size is $600$ million.
+However, the singular vector kernel will not have speedup compared to execution on CPU.
+
+When matrix size is huge, only one GPU is not enough to speed up the SVD.
+We make use of pthread to control mutiple GPUs.
+Each thread created by pthread takes control of one GPU.
+
+We also build a two-computer network to speed up the SVD.
+In our design, each computer has one GPU and communicated through sockets.
+

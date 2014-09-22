@@ -3,19 +3,31 @@ In this section, we will analyze the performance of our algorithm compared to ot
 In addition, we will discuss the GPU kernel profiling result to show how to improve our implementations.
 We also show our performance on huge matrix size.
 
-We tested our algorithm on an Intel Xeon Quad Core CPU 2.53GHz with a NVIDIA GeForce 750 Ti graphics processor 1.26GHz, and NVIDIA Tesla K40c processor 0.88GHz.
-NVIDIA GeForce 750Ti is an Maxwell processor card has 640 CUDA Cores and 1 GB memory.
-The memory bandwidth is 86.4 GB/s and the peak single precision floating point performance is 1.3 Tflops.
-NVIDIA Tesla K40c processor has a Kepler GPU with 2880 CUDA cores and 12 GB memory.
-The memory bandwidth is 288 GB/s and the peak single precision floating point performance is 4.29 Tflops.
+We tested our algorithm on GeForce 750 Ti, Quadro 600 and Tesla K40c.
+The specifications are in Table \ref{tab:spec}.
+\begin{table}[h]
+\caption{Specifications of Different GPUs}
+\centering
+\begin{tabular}{|c|c|c|c|}
+\hline
+Specifications & GeForce 750 & Quandro 600 & Tesla K40 \\ \hline
+Architecture   &     Maxwell &       Fermi &    Kepler \\ \hline
+CUDA Cores     &         640 &          96 &      2880 \\ \hline
+GPU Clock      &    1268 MHz &    1280 MHz &   745 MHz \\ \hline
+Mem Size       &        2 GB &        1 GB &     12 GB \\ \hline
+Mem Bandwidth  &   86.4 GB/s &   25.6 GB/s &  288 GB/s \\ \hline
+\end{tabular}
+\label{tab:spec}
+\end{table}
 
 \subsection{Comparision to other implementations}
 We generated random bidiagonal matrices with double precision numbers in the range of 0 to 1.
-In order to obtain relative accuracy experimental results, we generates 10 random matrix.
+In order to obtain relative accuracy experimental results, we generates 10 random matrices.
 For each matrix, the SVD algorithm was executed 10 times on GPU.
 The average performance does not vary much when more matrices and more times are used.
 
 We compare our algorithm with CULA GPU library, Intel MKL library, Sheetal's QR implementation on S1070, and Liu's divide-and-conquer implementation on M2070.
+We measure the performance of CULA on Tesla K40c, and that of Intel MKL on an 8-core cpu with 16 threads.
 Until now, CULA library only has QR routine culaDbdsqr.
 Intel MKL library has both divide-and-conquer DBDSDC and QR routine DBDSQR.
 Usually, divide-and-conquer routine is faster than QR routine, so we select DBDSDC instead of DBDSQR.
@@ -29,9 +41,9 @@ The results of Liu's are estimated comprehensively according to the figures pres
 \caption{Overall Performance Comparision}
 \label{fig:svd_speedup}
 \end{figure}
-Figure \ref{fig:svd_speedup} compares the performance of our implementation on Tesla K40c GPU to other existing libraries and implementations.
+Figure \ref{fig:svd_speedup} shows the performance of our implementation on Tesla K40c GPU to other existing libraries and implementations.
 We selects CULA QR routine BDBSQR as a baseline.
-From the figure, we achieve a speedup of 3.8 to 36 over CULA culaDbdsqr routine on the same GPU,
+From the figure, we achieve a speedup of 3.8 to 36 over CULA culaDbdsqr routine,
 while Intel MKL DBDSDC routine has a 2.9 to 4.3 speedup on a 8 core cpu, and Liu's implementation has only 0.5 to 4.7 speedup over CULA library.
 Sheetal's implementation is about 3 to 5.3 times slower than CULA library.
 The performance goes up when matrix size becomes large.
@@ -85,7 +97,6 @@ However, the optimal number of blocks shifts right to be a large number because 
 %If one have more, GPU will have to wait.
 %If all subintervals have the number of singular deviate from the integer multiples of a warp. The GPU efficiency will be less.
 
-
 \subsubsection{Comparasion of two different Singular Value Design}
 In this part, we compare the execution time on two different singular value kernels.
 For the length division design, we selects the minimal execution time corresponding to red point curve in figure \ref{fig:length_block_num}.
@@ -107,6 +118,25 @@ Also, figure \ref{fig:compare_value_kernel} represents the average execution tim
 When matrix size is smaller than $9k$, the difference between two designs is only on the interval division method.
 The division time in length division version is negligible since it is two small, while the division time in number division version increases.
 The execution time on obtaining singular values in both version are almost the same when matrix size is less than $9k$.
+
+\subsubsection{Profiling Analysis on Different GPUs}
+\textbf{I want to analyze the bound}
+
+\begin{figure}[hbpt]
+\centering
+\includegraphics[width=0.5\textwidth]{svd_val_gpus}
+\caption{Execution time of number-division singular value kernel on different GPUs with single-float precision}
+\label{fig:svd_val}
+\end{figure}
+Figure \ref{fig:svd_val} shows the execution time of singular value kernel on different GPUs. 
+
+\begin{figure}[hbpt]
+\centering
+\includegraphics[width=0.5\textwidth]{svd_vec_gpus}
+\caption{Execution time of singular value kernel on different GPUs with single-float precision}
+\label{fig:svd_vec}
+\end{figure}
+Figure \ref{fig:svd_vec} shows the execution time of singular vector kernel on different GPUs. 
 
 \subsubsection{Tolerance in Bisection Algorithm}
 Since the bisection algorithm is an approximate algorithm to calculate the singular values, we should test the effect of different error tolerance.
