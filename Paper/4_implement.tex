@@ -75,7 +75,7 @@ One thread will obtain one singular value in the subinterval.
 The singular vector kernel is designed based on Algorithm \ref{alg:twisted}.
 First, we achieve the algorithm without any optimization.
 But the 10X speedup compared to CPU is low because of the heavy usage of global memory and the low global memory throughput.
-After we utilize the local memory and shared memory instead of frequent-used global memory and change the matrix arrangement from row-major to column-major.
+After we utilize the local memory and shared memory instead of frequent-used global memory and change the matrix arrangement from row-major to column-major,
 The performance nearly doubled.
 
 Since the singular vectors are two $n\times n$ matrices, the memory on GPU will effect the maximum matrix size.
@@ -85,7 +85,7 @@ Thus, the maximum matrix size is determined by
 m_t = \sqrt{U / (5 * 4)}
 \label{eq:max_size}
 \end{equation}
-where $U$ is the memory size of GPU, $4$ means the size of float number.
+where $U$ is the memory size of GPU, $4$ means the number of bytes of float number.
 
 \subsection{Huge Size Solution}
 In our design, the maximum singular values can be processed on a singular GPU is $m_b = block\_size \times thread\_block\_size$,
@@ -93,8 +93,8 @@ while the maximum singular vectors are determined by Equation \ref{eq:max_size}.
 Usually, $m_b$ is much larger than $m_t$.
 For Tesla K40c with 16GB memory, $m_t = 24K$, while $m_b = 262K$
 However, when the matrix size becomes larger than $m_t$, even larger than $m_b$,
-the singular vector kernel cannot obtain all singular vectors at the same time.
-In this subsection, we introduce a divide-and-conquer architecture to solve the huge matrix size.
+the GPU kernels cannot obtain all singular values and vectors any more.
+In this subsection, we will introduce a divide-and-conquer architecture to solve the huge matrix size.
 
 When matrix size is less than $m_b$, but larger than $m_t$ from Equation \ref{eq:max_size},
 we only need to separate the singular vectors into small pieces which can be processed by a single GPU.

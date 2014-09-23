@@ -159,8 +159,24 @@ In other word, it shows the average increased execution time when the error tole
 From the figure, we can see that when matrix size is smaller than 12000, the additional execution time is only less than $20 ms$ when the error tolerance rises a level.
 When the matrix size is larger than 15000, the additional execution time is a little higher about $40 ms$ per level.
 
+\subsection{Pthread CUDA Result}
+\subsubsection{Load Balance}
+\begin{figure}[hbpt]
+\centering
+\includegraphics[width=0.5\textwidth]{pthread}
+\caption{Load Balance on GeForce and Quadro}
+\label{fig:pthread}
+\end{figure}
+Figure \ref{fig:pthread} shows the total execution time with different load balance on a system of two different GPUs.
+The horizontal axis represents the percentage of work on Quadro 600.
+The other percentage of work will be moved to GeForce 750 Ti obviously.
+The red points represent the minimum values in the blue curves.
+The blue curves can be separated into two parts by red points.
+The left ones are dominated by GeForce 750 Ti, while the right ones are contributed by Quadro 600.
+Since Quadro 600 has a worse performance than GeForce 750 Ti, less work is allocated on it.
+When around 15\% of work is executed on Quadro 600, and 85\% of that is processed on GeForce 750 Ti,
+the total performance of the system will be better than others.
 
-\subsection{Huge Size Result}
 \textbf{A table to shows the Huge Size Result. This part do not compare to other results.} 
 
 \begin{table}[h]
