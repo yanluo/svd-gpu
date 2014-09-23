@@ -4,7 +4,8 @@ CC = g++
 CU = nvcc
 CUFLAG = -lcudart
 #FLAG = -g -G
-FLAG = 
+FLAG = -UTIME
+#FLAG = -DTIME
 INC = -I/usr/local/cuda/include/
 CUDAFLAG = -gencode arch=compute_50,code=compute_50\
            -gencode arch=compute_35,code=compute_35\
@@ -20,7 +21,7 @@ $(OBJECT):$(SOURCE)
 %.o:%.cu
 	$(CU) $(FLAG) $(INC) $(CUDAFLAG) -o $@ -c $<
 %.o:%.cpp
-	$(CC) $(INC) -c $< -o $@
+	$(CC) $(FLAG) $(INC) -c $< -o $@
 
 clean:
 	rm -rf *.o $(OBJECT)

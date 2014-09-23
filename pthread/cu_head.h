@@ -20,7 +20,7 @@ void _check(cudaError_t cudaStatus, char const *const func, const char *const fi
 void gPrint1D(float *d_data, U32 n);
 void gPrint1D(unsigned int *d_data, U32 n);
 void gPrint2D(float *d_data, U32 height, U32 length);
-void par_eigenMat_v3(float *p_vec, float *d_a, float *d_b, U32 n, U32 n_lo, U32 n_up, float *p_val);
+void par_eigenMat_v3(float *p_lvec, float *p_rvec, float *d_a, float *d_b, U32 n, U32 n_lo, U32 n_up, float *p_val);
 
 void par_eigenval(float *eigval, float *p_a, float *p_b, U32 n, float lo, float up, U32 n_lo, U32 n_up, float tao);
 void small_eigval(float *p_val, float *p_a, float *p_b, U32 n, float lo, float up, U32 n_lo, U32 n_up, float tao);

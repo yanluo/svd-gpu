@@ -1,7 +1,6 @@
 #include "common.h"
 #include <float.h>
 #include <cmath>
-
 #include <iostream>
 #include <stdio.h>
 using namespace std;
@@ -18,23 +17,48 @@ U32 eigenCount(float *p_a, float *p_b, U32 n, float upper)
   return cnt;
 }
 
-void divide(float *p_a, float *p_b, U32 n, float ug, float lg, U32 n_ug, U32 n_lg, float &up, float &lo, U32 &n_up, U32 &n_lo, U32 partial, U32 procs)
+void divide(float *p_a, float *p_b, U32 n, float ug, float lg, U32 n_ug, U32 n_lg, float &up, float &lo, U32 &n_up, U32 &n_lo, U32 partial, U32 procs, U32 part, U32 whole)
 {
+#ifdef TIME
    float time;
    struct timeval tv_begin, tv_end;
    gettimeofday(&tv_begin, NULL);
+#endif
 
    float l, u, m;
    U32 n_m, n_l, n_u;
+
+   n_l = 0; n_u = n; n_m = -1;
+   l = lg; u = ug; m = (lg+ug)*0.5f;
+   while(n_m != n_lg + (n_ug-n_lg) * part/whole){
+      n_m = min(max(eigenCount(p_a, p_b, n, m),n_l),n_u);
+      if (n_m > n_lg + (n_ug-n_lg) * part/whole) {
+         u = m;  n_u = n_m;
+      } else {
+         l = m;  n_l = n_m;
+      }
+      m = (u+l)*0.5f;
+//      cout << m << " " << n_m << endl;
+   }
+   if (partial == 1){
+      up = m; n_up = n_m;
+      lo = lg; n_lo = n_lg;
+   } else {
+      lo = m; n_lo = n_m;
+      up = ug; n_up = n_ug;
+   }
+
+/*
+   cout << partial << " " << procs << endl;
    if (partial == 1 && procs == 1) {
       n_lo = n_lg; lo = lg;
       n_up = n_ug; up = ug;
    } else if (partial == 1){
       n_l = 0; n_u = n; n_m = -1;
       l = lg; u = ug; m = (lg+ug)*0.5f;
-      while(n_m != n * partial / procs){
+      while(n_m != n_lg + (n_ug-n_lg) * partial / procs){
          n_m = min(max(eigenCount(p_a, p_b, n, m),n_l),n_u);
-         if (n_m > n * partial / procs) {
+         if (n_m > n_lg + (n_ug-n_lg) * partial / procs) {
             u = m;  n_u = n_m;
          } else {
             l = m;  n_l = n_m;
@@ -46,9 +70,9 @@ void divide(float *p_a, float *p_b, U32 n, float ug, float lg, U32 n_ug, U32 n_l
    } else if (partial == procs) {
       n_l = 0; n_u = n; n_m = -1;
       l = lg; u = ug; m = (lg+ug)*0.5f;
-      while(n_m != n * (partial-1) / procs){
+      while(n_m != n_lg + (n_ug-n_lg) * (partial-1) / procs){
          n_m = min(max(eigenCount(p_a, p_b, n, m),n_l),n_u);
-         if (n_m > n * (partial-1) / procs) {
+         if (n_m > n_lg + (n_ug-n_lg) * (partial-1) / procs) {
             u = m;  n_u = n_m;
          } else {
             l = m;  n_l = n_m;
@@ -56,13 +80,13 @@ void divide(float *p_a, float *p_b, U32 n, float ug, float lg, U32 n_ug, U32 n_l
          m = (u+l)*0.5f;
       }
       lo = m; n_lo = n_m;
-      up = ug; n_up = n;
+      up = ug; n_up = n_ug;
    } else {
       n_l = 0; n_u = n; n_m = -1;
       l = lg; u = ug; m = (lg+ug)*0.5f;
-      while(n_m != n * partial / procs){
+      while(n_m != n_lg + (n_ug-n_lg) * partial / procs){
          n_m = min(max(eigenCount(p_a, p_b, n, m),n_l),n_u);
-         if (n_m > n * partial / procs) {
+         if (n_m > n_lg + (n_ug-n_lg) * partial / procs) {
             u = m;  n_u = n_m;
          } else {
             l = m;  n_l = n_m;
@@ -73,9 +97,9 @@ void divide(float *p_a, float *p_b, U32 n, float ug, float lg, U32 n_ug, U32 n_l
 
       n_l = 0; n_u = n; n_m = -1;
       l = lg; u = ug; m = (lg+ug)*0.5f;
-      while(n_m != n * (partial-1) / procs){
+      while(n_m != n_lg + (n_ug-n_lg) * (partial-1) / procs){
          n_m = min(max(eigenCount(p_a, p_b, n, m),n_l),n_u);
-         if (n_m > n * (partial-1) / procs) {
+         if (n_m > n_lg + (n_ug-n_lg) * (partial-1) / procs) {
             u = m;  n_u = n_m;
          } else {
             l = m;  n_l = n_m;
@@ -84,9 +108,12 @@ void divide(float *p_a, float *p_b, U32 n, float ug, float lg, U32 n_ug, U32 n_l
       }
       lo = m; n_lo = n_m;
    }
+*/
+#ifdef TIME
    gettimeofday(&tv_end, NULL);
    time = (tv_end.tv_sec-tv_begin.tv_sec)*1000 + (tv_end.tv_usec-tv_begin.tv_usec)/1000.0;
    cout << "Boundary Time : " << fixed<<setprecision(3) << time << " ms" << endl;
+#endif
 }
 
 void ger_bound(float &ug, float &lg, float * p_a, float * p_b, U32 n)
@@ -115,9 +142,11 @@ void ger_bound(float &ug, float &lg, float * p_a, float * p_b, U32 n)
 
 void boundary(float *p_a, float *p_b, U32 n, int argc, char * argv[], float &up, float &lo, U32 &n_up, U32 &n_lo)
 {
+#ifdef TIME
    float time;
    struct timeval tv_begin, tv_end;
    gettimeofday(&tv_begin, NULL);
+#endif
 
    float ug, lg;
    ger_bound(ug, lg, p_a, p_b, n);
@@ -143,7 +172,7 @@ void boundary(float *p_a, float *p_b, U32 n, int argc, char * argv[], float &up,
             m = (u+l)*0.5f;
          }
          up = m; n_up = n_m;
-         lo = lg; lo = lg;
+         lo = lg; n_lo = 0;
       } else if (partial == procs) {
          n_l = 0; n_u = n; n_m = -1;
          l = lg; u = ug; m = (lg+ug)*0.5f;
@@ -215,8 +244,10 @@ void boundary(float *p_a, float *p_b, U32 n, int argc, char * argv[], float &up,
       n_up = n; up = ug;
    }
 
+#ifdef TIME
    gettimeofday(&tv_end, NULL);
    time = (tv_end.tv_sec-tv_begin.tv_sec)*1000 + (tv_end.tv_usec-tv_begin.tv_usec)/1000.0;
    cout << "Boundary Time : " << fixed<<setprecision(3) << time << " ms" << endl;
+#endif
    return;
 }

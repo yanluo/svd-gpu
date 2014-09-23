@@ -13,6 +13,8 @@
 #define ITERS_DEFAULT	10
 #define THREAD_DEFAULT	512
 #define PRECISION_DEFAULT	10e-5
+#define PART_DEFAULT   1
+#define WHOLE_DEFAULT  2
 
 using namespace std;
 
@@ -31,6 +33,8 @@ typedef struct {
    float err;
    U32   p;
    U32   devs;
+   U32   part;
+   U32   whole;
    float *p_val;
 } cuda_st;
 
@@ -41,9 +45,10 @@ int getRandPara(int argc, char * argv[], int &randLowBound, int &randUpBound);
 int getPrecision(int argc, char * argv[], float &precision);
 int getPartial(int argc, char * argv[], U32 &procs, U32 &partial);
 int getRange(int argc, char * argv[], U32 &ucnt, U32 &lcnt);
+int getDivide(int argc, char *argv[], U32 &whole, U32 &part);
 int getIters(int argc, char * argv[], U32 &iters);
 int getThread(int argc, char * argv[], U32 &threads);
-void divide(float *p_a, float *p_b, U32 n, float ug, float lg, U32 n_ug, U32 n_lg, float &up, float &lo, U32 &n_up, U32 &n_lo, U32 partial, U32 procs);
+void divide(float *p_a, float *p_b, U32 n, float ug, float lg, U32 n_ug, U32 n_lg, float &up, float &lo, U32 &n_up, U32 &n_lo, U32 partial, U32 procs, U32 part, U32 whole);
 void boundary(float *p_a, float *p_b, U32 n, int argc, char * argv[], float &up, float &lo, U32 &n_up, U32 &n_lo);
 
 void initZero(float * pA, U32 k, U32 n);

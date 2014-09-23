@@ -135,10 +135,12 @@ __global__ void bisectKernelHuge(float *d_a, float *d_b, U32 n, float *d_eig, U3
 void huge_eigval(float *p_val, float *p_a, float *p_b, U32 n, float lo, float up, U32 n_lo, U32 n_up, float tao)
 {
     // Cuda Event for timing
+#ifdef TIME
     float time;
     cudaEvent_t start, stop;
     cudaErrors(cudaEventCreate(&start));
     cudaErrors(cudaEventCreate(&stop));
+#endif
 
     U32 size = n_up - n_lo;
     U32 interv = (size -1) / MAX_HUGE_THREAD + 1;
@@ -155,8 +157,10 @@ void huge_eigval(float *p_val, float *p_a, float *p_b, U32 n, float lo, float up
     cudaErrors(cudaMalloc((void **)&d_eig, sizeof(float)*size));
     cudaErrors(cudaMalloc((void **)&d_pos, sizeof(U32)*size));
 
-    cout << interv << " threads" << endl;
+//    cout << interv << " threads" << endl;
+#ifdef TIME
     cudaEventRecord(start, 0);
+#endif
     for (U32 i=0; i<iters; i++){
         separateInterval<<<1,MAX_HUGE_THREAD>>>(p_a, p_b, n, interv, d_lo, d_lcnt, lo, up, n_lo, n_up, tao);
         cudaErrors(cudaGetLastError());
@@ -171,10 +175,14 @@ void huge_eigval(float *p_val, float *p_a, float *p_b, U32 n, float lo, float up
             p_val[p_pos[j]] =p_eig[j];
         }
     }
+#ifdef TIME
     cudaEventRecord(stop, 0);
     cudaErrors(cudaEventSynchronize(stop));
     cudaErrors(cudaEventElapsedTime(&time, start, stop));
+    pthread_mutex_lock (&print);
     cout << "Parall Eigenval Time : " << fixed<<setprecision(3) << time/iters << " ms" << endl;
+    pthread_mutex_unlock (&print);
+#endif
 
     cudaErrors(cudaFree(d_lo));
     cudaErrors(cudaFree(d_lcnt));

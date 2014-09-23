@@ -17,10 +17,12 @@ int main(int argc, char * argv[])
    U32 n, procs, partial;
    int randlo, randup;
    float tao;
+   U32 whole, part;
    getSize(argc, argv, n);
    getRandPara(argc, argv, randlo, randup);
    getPrecision(argc, argv, tao);
    getPartial(argc, argv, procs, partial);
+   getDivide(argc, argv, whole, part);
    getIters(argc, argv, iters);
 
    float * p_a = new float[n];
@@ -35,19 +37,22 @@ int main(int argc, char * argv[])
    int devCount;
    cudaErrors(cudaGetDeviceCount(&devCount));
 //   devCount = 6;
-   cout << devCount << " GPU Device(s)" << endl;
+//   cout << devCount << " GPU Device(s)" << endl;
 
    // Obtain Boundary 
    float ug, lg;
    U32 n_ug, n_lg;
    boundary(p_a, p_b, n, argc, argv, ug, lg, n_ug, n_lg);
-   cout << "Bound:\t" << ug << "\t" << lg << endl;
-   cout << "Range:\t" << n_ug << "\t" << n_lg << endl;
+//   cout << "Bound:\t" << ug << "\t" << lg << endl;
+//   cout << "Range:\t" << n_ug << "\t" << n_lg << endl;
 
    cuda_st cuda[devCount];
    pthread_t pthread[devCount];
    pthread_mutex_init(&print, NULL);
 
+   part = 1; whole = 100;
+for(part = 99; part >= whole/2; part--){
+   cout << part << endl;
    for(int i=0; i<devCount; i++) {
       cuda[i].p_a = p_a;
       cuda[i].p_b = p_b;
@@ -60,8 +65,9 @@ int main(int argc, char * argv[])
       cuda[i].err = tao;
       cuda[i].p = i;
       cuda[i].devs = devCount;
+      cuda[i].part = part;
+      cuda[i].whole = whole;
    }
-
 
    for(int i=0; i<devCount; i++) {
       pthread_create(&pthread[i], NULL, thread_func, (void*)&cuda[i]);
@@ -69,6 +75,7 @@ int main(int argc, char * argv[])
    for(int i=0; i<devCount; i++) {
       pthread_join(pthread[i], NULL);
    }
+}
 
    // Free memory
    pthread_mutex_destroy(&print);
@@ -77,6 +84,7 @@ int main(int argc, char * argv[])
    delete []p_b;
    delete []p_val;
    p_a = p_b = p_val = NULL;
+   p_a = p_b = NULL;
   
    return 0;
 }
@@ -87,21 +95,21 @@ void *thread_func(void* struc){
    float * p_b = data->p_b;
    float * p_val = data->p_val;
    U32 n = data->n;
-   U32 n_lg = data->n_l;
-   U32 n_ug = data->n_u;
-   float lg = data->l;
-   float ug = data->u;
+   U32 n_lg = data->n_l, n_ug = data->n_u;
+   float lg = data->l, ug = data->u;
    float tao = data->err;
-   U32 devID = data->p;
+   int devID = data->p;
    U32 devCount = data->devs;
+   U32 part = data->part, whole = data->whole;
    float u,l;
    U32 n_u, n_l;
-   divide(p_a, p_b, n, ug, lg, n_ug, n_lg, u, l, n_u, n_l, devID+1, devCount);
-//   findCudaDevice(devID);
+   divide(p_a, p_b, n, ug, lg, n_ug, n_lg, u, l, n_u, n_l, devID+1, devCount,part, whole);
+   findCudaDevice(devID);
+   cudaDeviceReset();
    pthread_mutex_lock (&print);
-   cout << data->p << "\t[" << l << "," << u << ")\t[" << n_l << "," << n_u << ")" <<endl;
+//   cout << devID << "\t[" << l << "," << u << ")\t[" << n_l << "," << n_u << ")" <<endl;
+   cout << devID << "\t" << l << " " << u << "\t" << n_l << " " << n_u <<endl;
    pthread_mutex_unlock (&print);
-
 
    float *d_a, *d_b;
    cudaErrors(cudaMalloc((void **)&d_a, sizeof(float)*n));
@@ -109,20 +117,30 @@ void *thread_func(void* struc){
    cudaErrors(cudaMemcpy(d_b, p_b, sizeof(float)*(n+1), cudaMemcpyHostToDevice));
    cudaErrors(cudaMemcpy(d_a, p_a, sizeof(float)*n, cudaMemcpyHostToDevice));
 
+   float time;
+   struct timeval tv_begin, tv_end;
+   gettimeofday(&tv_begin, NULL);
+
    // Obtain Eigenvalue Parallel
    U32 k = n_u - n_l;
-//   float * p_val = new float[n];
    par_eigenval(p_val, d_a, d_b, n, l, u, n_l, n_u, tao);
-
    // Obtain Eigenvectors Serially
-   float * p_vec;
-   p_vec = new float[k*n];
-   par_eigenMat_v3(p_vec, d_a, d_b, n, n_l, n_u, p_val);
+   float * p_lvec = new float[k*n];
+   float * p_rvec = new float[k*n];
+   par_eigenMat_v3(p_lvec, p_rvec, d_a, d_b, n, n_l, n_u, p_val);
+
+   gettimeofday(&tv_end, NULL);
+   time = (tv_end.tv_sec-tv_begin.tv_sec)*1000 + (tv_end.tv_usec-tv_begin.tv_usec)/1000.0;
+   pthread_mutex_lock (&print);
+//   cout << "Thread " << devID << " total time : " << fixed<<setprecision(3) << time << " ms" << endl;
+   cout << devID << " " << fixed<<setprecision(3) << time << endl;
+   pthread_mutex_unlock (&print);
+
    cudaErrors(cudaFree(d_a));
    cudaErrors(cudaFree(d_b));
    cudaDeviceReset();
-   delete []p_vec;
-
+   delete []p_lvec;
+   delete []p_rvec;
 
    pthread_exit((void*) 0);
 

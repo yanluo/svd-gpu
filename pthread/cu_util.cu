@@ -8,7 +8,7 @@ int findCudaDevice(int &devID)
    cudaDeviceProp deviceProp;
    cudaErrors(cudaSetDevice(devID));
    cudaErrors(cudaGetDeviceProperties(&deviceProp, devID));
-   cout << "GPU Device " << devID << ": \"" << deviceProp.name << "\" with compute capability " << deviceProp.major << "." << deviceProp.minor << endl;
+//   cout << "GPU Device " << devID << ": \"" << deviceProp.name << "\" with compute capability " << deviceProp.major << "." << deviceProp.minor << endl;
    return 0;
 }
 
@@ -17,7 +17,7 @@ void _check(cudaError_t cudaStatus, char const *const func, const char *const fi
     if(cudaStatus){
         cout << "CUDA error at " << file << ":" << line << " code=" << cudaGetErrorString(cudaStatus) << "/" << func << endl;
         cudaDeviceReset();
-        exit(-1);
+//        exit(-1);
     }
 }
 

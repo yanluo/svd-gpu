@@ -54,6 +54,20 @@ int getPartial(int argc, char * argv[], U32 &procs, U32 &partial)
    return 0;
 }
 
+int getDivide(int argc, char *argv[], U32 &whole, U32 &part)
+{
+   for (unsigned int i=1; i<argc; i++){
+       if (strcmp(argv[i],"-d")==0){
+           part = atoi(argv[i+1]);
+           whole = atoi(argv[i+2]);
+           return 1;
+       }
+   }
+   part = PART_DEFAULT;
+   whole = WHOLE_DEFAULT;
+   return 0;
+}
+
 int getRange(int argc, char * argv[], U32 &ucnt, U32 &lcnt)
 {
    for (unsigned int i=1; i< argc; i++){
