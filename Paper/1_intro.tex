@@ -21,39 +21,39 @@ Three algorithms has been introduced to solve the bidiagonal SVD.
 QR algorithm is recognized as a powerful and effective method.
 However, it is only the fastest algorithm for small matrices whose sizes are less than 25\cite{97bookalgebra}.
 The complexity of $O(n^3)$ flops will give the execution time a rapid increment, as matrix size becomes large.
-Also, the iteration times still rise to a large integer when matrix size is large.
-Jacobi algorithm is the most accuracy method in practise.
+Also, the iteration time rises to a large integer number when matrix size is large.
+Jacobi algorithm is the most accuracy method in practise\cite{97bookalgebra}.
 However, the $O(n^3)$ flops with big constant will cause the algorithm much more slower than other algorithms.
 Also, the iteration time of Jacobi algorithm is much larger than those of QR algorithm.
 
 Divide-and-conquer algorithm is assumed as the fastest method of SVD when matrices are large\cite{94DCSVD}.
-It takes only $O(n^{2.3})$ flops on average\cite{97bookalgebra}.
+It takes $O(n^{2.3})$ flops on average\cite{97bookalgebra}.
 But the singular values are not relative accuracy when merging, let alone singular vectors.
 If all the singular values are distributed in the worst case, the time cost will increase to $O(n^3)$.
 
 In addition to the speed and relative accuracy, all of these three algorithms above have two common disadvantage for parallel computing:
 \begin{enumerate}
-\item These algorithms have more or less data dependence.
+\item These algorithms have heavy data dependence.
 The heavy data dependence makes SVD algorithm not suitable for parallelization and architecture extension.
 \item  These algorithms require $O(n^2)$ memory locations to save temporary variables.
 The large memory locations needed in these algorithms will not be able to calculate the SVD when the matrix is large enough.
 \end{enumerate}
 
-Most of SVD applications, such as principle component analysis (PCA), need only a small subset of the singular values and sigular vectors.
+Most of SVD applications, such as principle component analysis (PCA), need only a small subset of the singular values and vectors.
 However, the algorithms above are not able to calculate the subset directly.
-The only way is to select a part from all singular values and vectors.
-
 Fortunately, bisection and inverse (BI) algorithm could find the subset easily.
 Bisection and Inverse iteration takes $O(nk)$ flops to find $k$ singular values and singular vectors, and $O(nk^2)$ in the worst case of $k$ singular values are clustered.
-It is much faster than other algorithms when only a small subset of singular values and vectors are needed in a huge data size.
-But the inverse iteration does not guarantee the accuracy and orthogonality of the computed singular vectors in the case of singular values clustered.
+It is much faster than other algorithms, especially when only a small subset of singular values and vectors are needed in a huge data size.
+But the inverse iteration has its drawback.
+It does not guarantee the accuracy and orthogonality of the computed singular vectors in the case of singular values clustered.
 
 In this paper, we present a new SVD approach, bisection and twisted (BT) algorithm.
 It inherits the advantages of BI algorithms.
-It has proved that the singular vectors are accurate and orthogonal in twisted algorithm\cite{09NLAAtwisted}.
+It has been proved that the singular vectors are accurate and orthogonal in twisted algorithm\cite{09NLAAtwisted}.
 Comparing to other algorithms, BT approach only requires $O(n^2)$ flops to obtain all singular values and singular vectors\cite{09NLAAtwisted,05UCB}, even in the worst case.
 It is faster than any other algorithms metioned above.
-The algorithm does not have any data dependence, which is excellent for parallelism on multi-threads and extention to multi-GPU.
+The data dependence is weak in bisection and twisted algorithm.
+It is excellent for parallelism on multi-threads and extention to multi-GPU.
 The algorithm can also obtain one singular value and its conresponding vector in $O(n)$ flops.
 Additionally, the algorithm needs only $O(kn)$ memory location to store temporary memory.
 It is good to extend to many threads or many cores.

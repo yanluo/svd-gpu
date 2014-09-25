@@ -182,14 +182,50 @@ the total performance of the system will be better than others.
 \begin{table}[h]
 \caption{Performance of Huge Size Matrix}
 \centering
-\begin{tabular}{|c|c|c|c|c|c|c|}
+\begin{tabular}{|c|c|c|c|}
 \hline
-Matrix & \multicolumn{6}{|c|}{Number of GPUs} \\ \cline{2-7}
-Size & 1 & 2 & 3 & 4 & 5 & 6 \\ \hline
-100K   &   442s  &   224s  &   159s  &   123s  &    98s  &    87s\\ \hline
-200K   &  1666s  &   837s  &   564s  &   427s  &   341s  &   291s\\ \hline
-500K   & 13007s  &  6516s  &  4355s  &  3280s  &  2626s  &  2191s\\ \hline
-1000K  & 64591s  & 32333s  & 21597s  & 16219s  & 12983s  & 10836s\\ \hline
+Matrix Size & GeForce & Quadro & GeForce + Quadro \\ \hline
+ 10K*10K    &   0.8s  &  4.6s  &   0.7s (85\%) / 0.7s (15\%) \\ \hline
+ 20K*20K    &   2.9s  &   18s  &   2.6s (85\%) / 2.7s (15\%) \\ \hline
+ 30K*30K    &   6.7s  &   37s  &   5.9s (85\%) / 5.6s (15\%) \\ \hline
+ 40K*40K    &    12s  &   63s  &    10s (85\%) / 9.5s (15\%) \\ \hline
+ 50K*50K    &    19s  &   96s  &    16s (84\%) /  15s (16\%) \\ \hline
+ 80K*80K    &    50s  &  238s  &    43s (84\%) /  40s (16\%) \\ \hline
+ 100K*100K  &    84s  &  393s  &    71s (83\%) /  67s (17\%) \\ \hline
+ 120K*120K  &   134s  &     -  &   113s (82\%) / 102s (18\%) \\ \hline
+ 150K*150K  &   245s  &     -  &   203s (81\%) / 194s (19\%) \\ \hline
+ 180K*180K  &   412s  &     -  &   340s (80\%) / 337s (20\%) \\ \hline
+ 200K*200K  &   555s  &     -  &   -  \\ \hline
+\end{tabular}
+\label{tab:hresult}
+\end{table}
+
+\begin{table}[h]
+\caption{Performance of Huge Size Matrix with double floating-point on Tesla}
+\centering
+\begin{tabular}{|c|c|c|}
+\hline
+Matrix Size &  Tesla  & Tesla (50\%) + Tesls (50\%) \\ \hline
+ 10K*10K    &   s  &  1.2s / 0.6s \\ \hline
+ 20K*20K    &   s  &  4.9s / 3.6s \\ \hline
+ 30K*30K    &   s  &   12s / 9.3s \\ \hline
+ 40K*40K    &   s  &   21s /  18s \\ \hline
+ 50K*50K    &   s  &   41s /  36s \\ \hline
+% 60K*60K    &   s  &   55s /  47s \\ \hline
+% 70K*70K    &   s  &   73s /  59s \\ \hline
+ 80K*80K    &   s  &  103s /  81s \\ \hline
+% 90K*90K    &   s  &  145s / 115s \\ \hline
+ 100K*100K  &   s  &  190s / 154s \\ \hline
+% 110K*110K  &   s  &  231s / 178s \\ \hline
+ 120K*120K  &   s  &  286s / 243s \\ \hline
+% 130K*130K  &   s  &  286s / 217s \\ \hline
+% 140K*140K  &   s  &  359s / 292s \\ \hline
+ 150K*150K  &   s  &  469s / 399s \\ \hline
+% 160K*160K  &   s  &  473s / 378s \\ \hline
+% 170K*170K  &   s  &  491s / 379s \\ \hline
+ 180K*180K  &   s  &     -  \\ \hline
+% 190K*190K  &   s  &     -  \\ \hline
+ 200K*200K  &   s  &     -  \\ \hline
 \end{tabular}
 \label{tab:hresult}
 \end{table}
